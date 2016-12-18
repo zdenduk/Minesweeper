@@ -75,9 +75,11 @@ public class FieldImpl implements Field {
     }
 
     private void reveal(int x, int y) {
-        if (x < 0 || x > field.length || y < 0 || y > field[0].length) return; 
-        if (field[y][x].getNumber() == 0 && !field[y][x].equals(FieldType.CLEAR)) {
-            field[y][x].setFieldType(FieldType.CLEARED);
+        System.out.println(field[x][y].getFieldType());
+        System.out.println(field[x][y].getNumber());
+        if (x < 0 || x > field.length || y < 0 || y > field[0].length) return;
+        if (field[x][y].getNumber() == 0 && !field[x][y].equals(FieldType.CLEARED)) {
+            field[x][y].setFieldType(FieldType.CLEARED);
             reveal(x + 1, y);
             reveal(x - 1, y);
             reveal(x, y - 1);
