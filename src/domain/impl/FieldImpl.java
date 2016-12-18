@@ -1,63 +1,89 @@
 package domain.impl;
 
 import domain.Field;
+import domain.FieldType;
 
 import java.util.Random;
 
 public class FieldImpl implements Field {
-    private char[][] field;
+    private FieldTypeImpl[][] field;
 
-    private final int width = 30;
-    private final int height = 16;
-    private final int mines = 99;
+    private final int width = 10;
+    private final int height = 10;
+    private final int mines = 10;
 
     public FieldImpl() {
-        field = new char[height][width];
+        field = new FieldTypeImpl[height][width];
         createField();
     }
 
     private void createField() {
+        for (int i = 0; i < field.length; i++) {
+            for (int j = 0; j < field[0].length; j++) {
+                field[i][j] = new FieldTypeImpl(FieldType.CLEAR, 0);
+            }
+        }
         Random r = new Random();
         int tmp = 0;
         while (tmp < mines) {
             int x = r.nextInt(height);
             int y = r.nextInt(width);
-            if (field[x][y] != '*') {
-                field[x][y] = '*';
+            if (!field[x][y].getFieldType().equals(FieldType.BOMB)) {
+                field[x][y].setFieldType(FieldType.BOMB);
                 tmp++;
             }
         }
         createNumbers();
     }
 
+
     private void createNumbers() {
         for (int i = 0; i < field.length; i++) {
             for (int j = 0; j < field[0].length; j++) {
-                if (field[i][j] != '*') {
-
-                    int count = 0;
-                    for (int p = i - 1; p <= i + 1; p++) {
-                        for (int q = j - 1; q <= j + 1; q++) {
-                            if (0 <= p && p < field.length && 0 <= q && q < field[0].length) {
-                                if (field[p][q] == '*')
-                                    count++;
-                            }
-                        }
-                    }
-                    if (count > 0) {
-                        field[i][j] = (char) (count + '0');
-                    } else {
-                        field[i][j] = ' ';
-                    }
+                if (field[i][j].getFieldType().equals(FieldType.BOMB)) {
+                    int count = countMines(i, j);
+                    setNumbers(i, j, count);
                 }
             }
         }
     }
 
+    private void setNumbers(int i, int j, int count) {
+        field[i][j].setNumber(count);
+    }
+
+    private int countMines(int i, int j) {
+        int count = 0;
+        for (int k = i - 1; k <= i + 1; k++) {
+            for (int l = j - 1; l <= j + 1; l++) {
+                if (0 <= k && k < field.length && 0 <= l && l < field[0].length) {
+                    if (field[k][l].getFieldType().equals(FieldType.BOMB))
+                        count++;
+                }
+            }
+        }
+        return count;
+    }
+
     @Override
     public void guessOn(int x, int y) {
-        if (field[x][y] == '*') {
+        if (field[x][y].getFieldType().equals(FieldType.BOMB)) {
             gameOver();
+        } else {
+            reveal(x, y);
+        }
+    }
+
+    private void reveal(int x, int y) {
+        if (x < 0 || x > field.length || y < 0 || y > field[0].length) return; // check for bounds
+        if (field[y][x].getNumber() == 0 && !field[y][x].equals(FieldType.CLEAR)) {
+            field[y][x].setFieldType(FieldType.CLEARED);
+            reveal(x + 1, y);
+            reveal(x - 1, y);
+            reveal(x, y - 1);
+            reveal(x, y + 1);
+        } else {
+            return;
         }
     }
 
@@ -66,7 +92,7 @@ public class FieldImpl implements Field {
     }
 
     @Override
-    public char[][] getField() {
+    public FieldTypeImpl[][] getField() {
         return field;
     }
 }
