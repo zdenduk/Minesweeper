@@ -38,10 +38,14 @@ public class GameUI {
         System.out.println("Enter coordinates:");
         int x = sc.nextInt();
         int y = sc.nextInt();
+        checkBounds(field, x, y);
+        field.guessOn(x, y);
+    }
+
+    private static void checkBounds(Field field, int x, int y) {
         if (x > field.getField().length || x < 0 || y > field.getField()[0].length || y < 0) {
             throw new IllegalArgumentException("You entered wrong arguments.");
         }
-        field.guessOn(x, y);
     }
 
     private static void printField(Field field) {
